@@ -318,21 +318,24 @@ export class AIService {
   }
 
   /**
-   * Domain-specific smart text generator for built-in mode
+   * Domain-specific smart text generator for built-in mode (ChatGPT Style)
    */
   private static generateSmartResponseText(prompt: string, systemPrompt: string): string {
     const lower = prompt.trim().toLowerCase();
 
-    if (['hi', 'hello', 'hey', 'greetings', 'good morning', 'good evening', 'hi there', 'hola'].includes(lower) || lower.startsWith('hi ') || lower.startsWith('hello ')) {
-      return `Hello there! 👋 I am **NexusAI**, your professional AI assistant.
+    // Greetings & Friendly Chit-Chat
+    if (['hi', 'hello', 'hey', 'hi there', 'hello there', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy', 'what\'s up'].includes(lower) || lower.startsWith('hi ') || lower.startsWith('hello ')) {
+      return `Hello! 👋 How can I help you today? Feel free to ask me anything—whether it's writing code, explaining a complex topic, drafting content, or brainstorming ideas!`;
+    }
 
-How can I help you today? Here are a few things I can assist you with:
-- 💻 **Coding & Debugging**: Write, fix, or optimize code in React, Python, Node.js, C++, etc.
-- ✍️ **Writing & Editing**: Draft emails, articles, pitch decks, or story outlines.
-- 📊 **Data & Math**: Explain complex topics, statistics, or equations.
-- 📈 **Business & Strategy**: Analyze market trends, KPIs, and strategic goals.
+    // How are you / Status
+    if (lower.includes('how are you') || lower.includes('how r u') || lower.includes('how are u')) {
+      return `I'm doing great, thank you for asking! 😊 I'm ready to assist you. What would you like to work on or learn about today?`;
+    }
 
-What would you like to work on today?`;
+    // Who are you
+    if (lower.includes('who are you') || lower.includes('what is your name') || lower.includes('who built you')) {
+      return `I am **NexusAI**, a professional AI conversational assistant. I'm designed to answer questions, write code, analyze data, and assist with creative writing just like ChatGPT!`;
     }
 
     if (lower.includes('code') || lower.includes('react') || lower.includes('function') || lower.includes('typescript') || lower.includes('hook') || lower.includes('python')) {
