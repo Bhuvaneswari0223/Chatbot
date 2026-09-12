@@ -321,7 +321,19 @@ export class AIService {
    * Domain-specific smart text generator for built-in mode
    */
   private static generateSmartResponseText(prompt: string, systemPrompt: string): string {
-    const lower = prompt.toLowerCase();
+    const lower = prompt.trim().toLowerCase();
+
+    if (['hi', 'hello', 'hey', 'greetings', 'good morning', 'good evening', 'hi there', 'hola'].includes(lower) || lower.startsWith('hi ') || lower.startsWith('hello ')) {
+      return `Hello there! 👋 I am **NexusAI**, your professional AI assistant.
+
+How can I help you today? Here are a few things I can assist you with:
+- 💻 **Coding & Debugging**: Write, fix, or optimize code in React, Python, Node.js, C++, etc.
+- ✍️ **Writing & Editing**: Draft emails, articles, pitch decks, or story outlines.
+- 📊 **Data & Math**: Explain complex topics, statistics, or equations.
+- 📈 **Business & Strategy**: Analyze market trends, KPIs, and strategic goals.
+
+What would you like to work on today?`;
+    }
 
     if (lower.includes('code') || lower.includes('react') || lower.includes('function') || lower.includes('typescript') || lower.includes('hook') || lower.includes('python')) {
       return `Here is a clean, production-ready solution written in **TypeScript / React** to address your requirement:
@@ -360,9 +372,9 @@ export const TaskItem: React.FC<TaskProps> = ({ id, title, completed, onToggle }
 ### Key Architectural Highlights:
 1. **Memoization & Performance**: Utilizes \`useCallback\` to prevent unnecessary function re-creations across renders.
 2. **Type Safety**: Strictly typed props interface ensures compile-time safety.
-3. **Accessibility & Clean UX**: Includes interactive state transitions and semantic styling using utility classes.
+3. **Accessibility & Clean UX**: Includes interactive state transitions and semantic styling.
 
-Would you like me to add automated unit tests or extend this component with state persistence?`;
+Would you like me to add automated unit tests or extend this component?`;
     }
 
     if (lower.includes('quantum') || lower.includes('explain') || lower.includes('physics') || lower.includes('how does')) {
