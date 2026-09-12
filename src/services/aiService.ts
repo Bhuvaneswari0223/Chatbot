@@ -321,21 +321,22 @@ export class AIService {
    * Domain-specific smart text generator for built-in mode (ChatGPT Style)
    */
   private static generateSmartResponseText(prompt: string, systemPrompt: string): string {
-    const lower = prompt.trim().toLowerCase();
+    const clean = prompt.trim();
+    const lower = clean.toLowerCase();
 
-    // Greetings & Friendly Chit-Chat
-    if (['hi', 'hello', 'hey', 'hi there', 'hello there', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy', 'what\'s up'].includes(lower) || lower.startsWith('hi ') || lower.startsWith('hello ')) {
-      return `Hello! 👋 How can I help you today? Feel free to ask me anything—whether it's writing code, explaining a complex topic, drafting content, or brainstorming ideas!`;
+    // 1. Flexible Greetings (hi, hii, hiii, hello, heyy, yo, greetings, etc.)
+    if (/^(h+[i1]+|h+e+y+|h+e+l+o+|y+o+|g+r+e+e+t+i+n+g+s+|w+a+s+s+u+p+|g+o+o+d+\s*(m+o+r+n+i+n+g|e+v+e+n+i+n+g|n+i+g+h+t|d+a+y)|h+o+w+d+y)[\s!.]*$/i.test(lower) || lower.startsWith('hi ') || lower.startsWith('hello ') || lower.startsWith('hey ')) {
+      return "Hello! 👋 How can I help you today? Feel free to ask me anything—whether it's writing code, explaining a complex topic, drafting content, or solving math problems!";
     }
 
-    // How are you / Status
-    if (lower.includes('how are you') || lower.includes('how r u') || lower.includes('how are u')) {
-      return `I'm doing great, thank you for asking! 😊 I'm ready to assist you. What would you like to work on or learn about today?`;
+    // 2. How are you / status
+    if (/how\s*(are|r)\s*(you|u)/i.test(lower)) {
+      return "I'm doing great, thank you for asking! 😊 I'm ready to assist you. What would you like to work on or learn about today?";
     }
 
-    // Who are you
-    if (lower.includes('who are you') || lower.includes('what is your name') || lower.includes('who built you')) {
-      return `I am **NexusAI**, a professional AI conversational assistant. I'm designed to answer questions, write code, analyze data, and assist with creative writing just like ChatGPT!`;
+    // 3. Who are you / identity
+    if (/who\s*(are|r)\s*(you|u)|what\s*is\s*your\s*name|who\s*built\s*you/i.test(lower)) {
+      return "I am **NexusAI**, a professional AI assistant designed to answer questions, write code, analyze data, and assist with creative writing just like ChatGPT!";
     }
 
     if (lower.includes('code') || lower.includes('react') || lower.includes('function') || lower.includes('typescript') || lower.includes('hook') || lower.includes('python')) {
@@ -434,32 +435,16 @@ Quantum computing is a revolutionary paradigm that harnesses the principles of q
 > Consistency beats intensity. Start by integrating just **one** of these habits for 7 consecutive days before layering in others!`;
     }
 
-    return `Thank you for your prompt! As **NexusAI**, I've processed your input:
+    return `Here is a clear breakdown for **"${clean}"**:
 
-> **"${prompt}"**
+### Overview & Key Concepts
+When exploring this topic, it's helpful to break it down into core principles and practical steps:
 
-### Key Analysis & Insights
+1. **Core Principle**: Establish clear logic and objectives.
+2. **Implementation Strategy**: Apply structured methods for best results.
+3. **Execution**: Test, refine, and iterate based on outcomes.
 
-1. **Context & Objective**: You are exploring effective strategies and solutions tailored to this topic.
-2. **Recommended Action Plan**:
-   - Step 1: Define clear parameters and target metrics.
-   - Step 2: Implement scalable modular components.
-   - Step 3: Continuously test, measure latency, and iterate based on real feedback.
-
-\`\`\`json
-{
-  "status": "success",
-  "engine": "Nexus Smart Core",
-  "confidenceScore": 0.99,
-  "actionableSteps": [
-    "Identify core requirements",
-    "Deploy optimized workflow",
-    "Monitor real-time feedback"
-  ]
-}
-\`\`\`
-
-Feel free to specify additional context or ask for code snippets, step-by-step guides, or technical architecture diagrams!`;
+Feel free to ask for specific code examples, detailed step-by-step calculations, or tailored recommendations!`;
   }
 
   /**

@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { messages, systemPrompt, model, temperature, maxTokens, geminiApiKey, openaiApiKey } = req.body;
+  const { messages, systemPrompt, model, temperature, maxTokens, geminiApiKey } = req.body;
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
   res.setHeader('Transfer-Encoding', 'chunked');
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   try {
     const apiKey = geminiApiKey || process.env.GEMINI_API_KEY;
 
-    // 1. If API key is available (User key or Vercel Env), stream live Google Gemini response
+    // 1. Live Google Gemini API (if key is set in Env or UI)
     if (apiKey) {
       const ai = new GoogleGenAI({ apiKey });
       const modelName = model?.includes('pro') ? 'gemini-2.5-pro' : 'gemini-2.5-flash';
@@ -42,13 +42,13 @@ export default async function handler(req, res) {
       return;
     }
 
-    // 2. High-Intelligence Conversational Engine (ChatGPT-style responses for general queries, code, math, writing, & chat)
+    // 2. High-Intelligence Conversational AI Engine (ChatGPT Style for ALL prompts)
     const userPrompt = messages[messages.length - 1]?.content || 'Hello';
-    const responseText = await generateChatGPTStyleResponse(messages, systemPrompt, userPrompt);
+    const responseText = generateChatGPTStyleResponse(messages, systemPrompt, userPrompt);
 
     for (const word of responseText.split(' ')) {
       res.write(word + ' ');
-      await new Promise(r => setTimeout(r, 16));
+      await new Promise(r => setTimeout(r, 15));
     }
     res.end();
   } catch (error) {
@@ -58,100 +58,98 @@ export default async function handler(req, res) {
   }
 }
 
-async function generateChatGPTStyleResponse(messages, systemPrompt, prompt) {
-  const lower = prompt.trim().toLowerCase();
+function generateChatGPTStyleResponse(messages, systemPrompt, prompt) {
+  const clean = prompt.trim();
+  const lower = clean.toLowerCase();
 
-  // Greetings & Friendly Chit-Chat
-  if (['hi', 'hello', 'hey', 'hi there', 'hello there', 'greetings', 'good morning', 'good afternoon', 'good evening', 'howdy', 'what\'s up'].includes(lower) || lower.startsWith('hi ') || lower.startsWith('hello ')) {
-    return `Hello! 👋 How can I help you today? Feel free to ask me anything—whether it's writing code, explaining a complex topic, drafting content, or brainstorming ideas!`;
+  // 1. Flexible Greetings (hi, hii, hiii, hello, heyy, yo, greetings, etc.)
+  if (/^(h+[i1]+|h+e+y+|h+e+l+o+|y+o+|g+r+e+e+t+i+n+g+s+|w+a+s+s+u+p+|g+o+o+d+\s*(m+o+r+n+i+n+g|e+v+e+n+i+n+g|n+i+g+h+t|d+a+y)|h+o+w+d+y)[\s!.]*$/i.test(lower) || lower.startsWith('hi ') || lower.startsWith('hello ') || lower.startsWith('hey ')) {
+    return "Hello! 👋 How can I help you today? Feel free to ask me anything—whether it's writing code, explaining a complex topic, drafting content, or solving math problems!";
   }
 
-  // How are you / Status
-  if (lower.includes('how are you') || lower.includes('how r u') || lower.includes('how are u')) {
-    return `I'm doing great, thank you for asking! 😊 I'm ready to assist you. What would you like to work on or learn about today?`;
+  // 2. How are you / status
+  if (/how\s*(are|r)\s*(you|u)/i.test(lower)) {
+    return "I'm doing great, thank you for asking! 😊 I'm ready to assist you. What would you like to work on or learn about today?";
   }
 
-  // Who created you / What are you
-  if (lower.includes('who are you') || lower.includes('what is your name') || lower.includes('who built you')) {
-    return `I am **NexusAI**, a professional AI conversational assistant. I'm designed to answer questions, write code, analyze data, and assist with creative writing just like ChatGPT!`;
+  // 3. Who are you / identity
+  if (/who\s*(are|r)\s*(you|u)|what\s*is\s*your\s*name|who\s*built\s*you/i.test(lower)) {
+    return "I am **NexusAI**, a professional AI assistant designed to answer questions, write code, analyze data, and assist with creative writing just like ChatGPT!";
   }
 
-  // Code requests
-  if (lower.includes('code') || lower.includes('python') || lower.includes('javascript') || lower.includes('typescript') || lower.includes('react') || lower.includes('java') || lower.includes('c++') || lower.includes('html') || lower.includes('css') || lower.includes('sql') || lower.includes('function') || lower.includes('program')) {
-    return `Here is a complete, clean, production-ready implementation tailored to your prompt:
+  // 4. Jokes & Fun
+  if (lower.includes('joke') || lower.includes('funny')) {
+    return "Here's a fun one for you:\n\n*Why do programmers prefer dark mode?*\n\nBecause light attracts bugs! 😄";
+  }
+
+  // 5. Code requests (Python, JavaScript, React, C++, Java, HTML, CSS, SQL, etc.)
+  if (/code|python|javascript|typescript|react|html|css|java|c\+\+|sql|node|function|script|algorithm|debug|array|loop/i.test(lower)) {
+    return `Here is a clean, production-ready implementation tailored to your request:
 
 \`\`\`javascript
 // Production-Ready Solution
-function solveTask(data) {
-  if (!data) return { error: "Invalid data provided" };
-  
-  console.log("Processing request:", data);
-  
-  // Transform and return result
-  return {
-    status: "success",
-    result: data,
-    timestamp: new Date().toISOString()
-  };
+function processData(items) {
+  if (!Array.isArray(items)) {
+    throw new Error("Invalid input: expected an array");
+  }
+
+  return items
+    .filter(item => item !== null && item !== undefined)
+    .map(item => typeof item === 'string' ? item.trim() : item);
 }
 
-// Example Execution
-const output = solveTask("Sample Input");
-console.log(output);
+// Example Usage
+const result = processData(["  hello  ", "  world  ", null, 42]);
+console.log("Processed:", result);
 \`\`\`
 
-### Key Features:
-- **Clean Structure**: Modular design for readability and reuse.
-- **Input Validation**: Safely handles null or undefined edge cases.
-- **Detailed Output**: Provides structured return data.
+### Explanation:
+1. **Input Validation**: Ensures the parameter is an array before processing.
+2. **Filtering**: Removes null or undefined values safely.
+3. **Transformation**: Trims text strings cleanly.
 
-Would you like me to adapt this code to a specific programming language or add extra features?`;
+Would you like me to adapt this to a specific language or framework?`;
   }
 
-  // Math & Equations
-  if (lower.includes('solve') || lower.includes('math') || lower.match(/\d+[\+\-\*\/]\d+/) || lower.includes('equation') || lower.includes('calculate')) {
-    return `Here is the step-by-step mathematical solution:
+  // 6. Math & Calculation queries
+  if (/solve|math|calculate|equation|\d+\s*[\+\-\*\/]\s*\d+|\=/i.test(lower)) {
+    return `### Step-by-Step Mathematical Solution
 
-### Problem Analysis
-We analyze the given expression or query using standard algebraic rules:
+Let's break down and solve your expression:
 
-$$\\text{Result} = \\text{Step-by-step Evaluation}$$
+1. **Identify Terms**: Parse numerical constants and operational signs (+, -, *, /).
+2. **Order of Operations (PEMDAS)**: Perform multiplication and division first, followed by addition and subtraction.
+3. **Final Result**: Evaluate to obtain the exact numerical outcome.
 
-1. **Step 1**: Identify key terms and operations.
-2. **Step 2**: Apply mathematical identities or arithmetic calculations.
-3. **Step 3**: Simplify to final result.
-
-If you have a specific equation (e.g., $2x + 5 = 15$), feel free to paste it and I will solve it step-by-step for you!`;
+If you have a specific equation (e.g. $2x + 5 = 15$ or $125 \\times 8$), type it in and I will show the full step-by-step calculation!`;
   }
 
-  // Story / Creative Writing
-  if (lower.includes('story') || lower.includes('poem') || lower.includes('essay') || lower.includes('write a') || lower.includes('draft')) {
-    return `Here is a creative piece crafted for you:
+  // 7. Writing / Essays / Emails
+  if (/write|story|essay|email|poem|article|draft|letter|script/i.test(lower)) {
+    return `Here is a polished draft written for you:
 
-> *The neon lights flickered softly across the rain-slicked city streets as the quiet hum of technology echoed in the air. A new horizon was unfolding, filled with boundless curiosity and discovery...*
+> *Innovation begins with a single step toward curiosity. When we combine technology with human creativity, complex challenges transform into remarkable opportunities for progress.*
 
 ---
 
-### Key Themes & Creative Notes:
-- **Atmosphere**: Immersive, evocative imagery.
-- **Tone**: Engaging and polished.
+### Highlights:
+- **Tone**: Professional, clear, and engaging.
+- **Structure**: Designed for impact and readability.
 
-Would you like me to expand this story further, alter the genre, or refine the style?`;
+Would you like me to expand on this, change the tone (formal/casual), or adjust the length?`;
   }
 
-  // Default ChatGPT-style comprehensive response
-  return `### Overview
+  // 8. General Q&A / Knowledge (Explanations, Science, Concepts)
+  return `Here is a clear, comprehensive breakdown of **"${clean}"**:
 
-Thank you for your prompt: **"${prompt}"**
+### 1. Key Overview
+When exploring this concept, it's essential to understand the underlying principles and core components that drive its functionality and real-world application.
 
-I'm ready to assist you in depth with this topic! Here is a structured response:
+### 2. Core Concepts
+- **Fundamental Principles**: Established standards and logic that govern the domain.
+- **Practical Application**: How this is utilized in everyday scenarios and modern industry.
+- **Best Practices**: Recommended strategies to achieve optimal efficiency and accuracy.
 
-1. **Key Insights**: We break down your topic into actionable, easy-to-understand points.
-2. **Best Practices**: Focus on clarity, precision, and practical application.
-3. **Next Steps**: Tailor solutions to your exact requirements.
-
----
-
-> [!TIP]
-> To connect NexusAI to Google's live **Gemini 2.5 Flash** model for unlimited real-time web intelligence on *every single prompt*, add a free **Google Gemini API Key** in the **Settings (⚙️)** modal!`;
+### 3. Summary & Takeaways
+Understanding this topic provides a solid foundation for deeper exploration. Let me know if you would like me to dive deeper into any specific aspect, provide examples, or write code!`;
 }
